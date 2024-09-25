@@ -2,7 +2,7 @@
  * @file        https://github.com/Zilong-Li/vcfpp/vcfpp.h
  * @author      Zilong Li
  * @email       zilong.dk@gmail.com
- * @version     v0.5.2
+ * @version     v0.5.3
  * @breif       a single C++ file for manipulating VCF
  * Copyright (C) 2022-2023.The use of this code is governed by the LICENSE file.
  ******************************************************************************/
@@ -1523,6 +1523,7 @@ class BcfReader
     kstring_t s = {0, 0, NULL}; // kstring
     std::string fname;
     bool isBcf; // if the input file is bcf or vcf;
+    bool _intervalIsEmpty = true;
 
   public:
     /// a BcfHeader object
@@ -1661,8 +1662,18 @@ class BcfReader
                 itr = tbx_itr_querys(tidx, ".");
             else
                 itr = tbx_itr_querys(tidx, region.c_str());
-            if(itr == NULL) throw std::runtime_error("no interval region found!");
+
+            // interval contains no variants
+            // a user can then check intervalIsEmpty() and decide
+            // whether to throw an error
+            _intervalIsEmpty = (itr == NULL) ? true : false;
         }
+    }
+
+    /** @brief Check if the query interval is empty
+     *   */
+    bool intervalIsEmpty(){
+        return _intervalIsEmpty;
     }
 
     /** @brief read in the next variant
